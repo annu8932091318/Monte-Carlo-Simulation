@@ -68,9 +68,3 @@ if __name__ == '__main__':
     print(f"🎯 Ready to process risk simulations!")
     
     app.run(host='0.0.0.0', port=port, debug=debug)
-    print(f"📊 API Documentation: http://localhost:{port}/api/docs")
-    print(f"🏥 Health Check: http://localhost:{port}/health")
-    print(f"📝 Examples: http://localhost:{port}/api/examples")
-    print(f"🎯 Ready to process risk simulations!")
-    
-    app.run(host='0.0.0.0', port=port, debug=debug)

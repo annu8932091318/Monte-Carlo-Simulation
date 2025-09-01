@@ -9,6 +9,7 @@ from flask import Blueprint, request, jsonify
 import time
 import traceback
 import sys
+from typing import Optional, Dict, Any, List
 
 # Create blueprint for routes
 routes_bp = Blueprint('routes', __name__)
@@ -21,14 +22,18 @@ try:
     from simulations.varcov import variance_covariance_method, stress_test_varcov
     from simulations.gbm import gbm_simulation, multi_asset_gbm, path_dependent_gbm
     print("✅ All simulation modules imported successfully")
+    MODULES_IMPORTED = True
 except ImportError as e:
-    print(f"Import error: {e}")
-    print("Creating stub functions for missing modules...")
+    print(f"⚠️  Import error: {e}")
+    print("🔄 Using stub functions for missing modules...")
+    MODULES_IMPORTED = False
     
-    def monte_carlo_simulation(portfolio, params=None):
+# Create stub functions if modules failed to import
+if not MODULES_IMPORTED:
+    def monte_carlo_simulation(portfolio: List[float], params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Stub implementation"""
         import numpy as np
-        initial_value = sum(portfolio)
+        initial_value = float(sum(portfolio))
         return {
             'simulation_config': {
                 'method': 'monte_carlo',
@@ -51,34 +56,34 @@ except ImportError as e:
             }
         }
     
-    def advanced_monte_carlo_simulation(portfolio, params=None):
+    def advanced_monte_carlo_simulation(portfolio: List[float], params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         return monte_carlo_simulation(portfolio, params)
     
-    def historical_simulation(portfolio, params=None):
+    def historical_simulation(portfolio: List[float], params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         return monte_carlo_simulation(portfolio, params)
     
-    def bootstrap_historical(portfolio, params=None):
+    def bootstrap_historical(portfolio: List[float], params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         return monte_carlo_simulation(portfolio, params)
     
-    def bootstrap_simulation(portfolio, params=None):
+    def bootstrap_simulation(portfolio: List[float], params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         return monte_carlo_simulation(portfolio, params)
     
-    def advanced_bootstrap(portfolio, params=None):
+    def advanced_bootstrap(portfolio: List[float], params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         return monte_carlo_simulation(portfolio, params)
     
-    def variance_covariance_method(portfolio, params=None):
+    def variance_covariance_method(portfolio: List[float], params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         return monte_carlo_simulation(portfolio, params)
     
-    def stress_test_varcov(portfolio, params=None):
+    def stress_test_varcov(portfolio: List[float], params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         return monte_carlo_simulation(portfolio, params)
     
-    def gbm_simulation(portfolio, params=None):
+    def gbm_simulation(portfolio: List[float], params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         return monte_carlo_simulation(portfolio, params)
     
-    def multi_asset_gbm(portfolio, params=None):
+    def multi_asset_gbm(portfolio: List[float], params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         return monte_carlo_simulation(portfolio, params)
     
-    def path_dependent_gbm(portfolio, params=None):
+    def path_dependent_gbm(portfolio: List[float], params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         return monte_carlo_simulation(portfolio, params)
 
 # Utility functions
@@ -286,10 +291,11 @@ def api_examples():
 def simulate():
     """Main simulation endpoint"""
     try:
-        print(f"🐍 Received simulation request: {request.json.get('method', 'unknown')}")
+        data = request.get_json()
+        method_name = data.get('method', 'unknown') if data else 'unknown'
+        print(f"🐍 Received simulation request: {method_name}")
         start_time = time.time()
         
-        data = request.get_json()
         if not data:
             return jsonify({
                 'error': 'Invalid JSON data',

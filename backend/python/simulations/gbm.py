@@ -87,9 +87,9 @@ def gbm_simulation(
     volatilities = params.get('volatilities', None)
     correlations = params.get('correlations', None)
     
-    portfolio = np.array(portfolio, dtype=np.float64)
-    initial_value = np.sum(portfolio)
-    num_assets = len(portfolio)
+    portfolio_array = np.array(portfolio, dtype=np.float64)
+    initial_value = np.sum(portfolio_array)
+    num_assets = len(portfolio_array)
     
     print(f"📈 Running GBM Simulation:")
     print(f"  Portfolio Value: ${initial_value:,.2f}")
@@ -144,7 +144,7 @@ def gbm_simulation(
     
     for i in range(iterations):
         # Initialize asset prices
-        asset_prices = portfolio.copy()
+        asset_prices = portfolio_array.copy()
         
         if i < store_paths:
             stored_paths[i, 0] = asset_prices
@@ -178,25 +178,25 @@ def gbm_simulation(
     
     for asset_idx in range(num_assets):
         asset_terminals = terminal_asset_values[:, asset_idx]
-        asset_returns = (asset_terminals / portfolio[asset_idx]) - 1
+        asset_returns = (asset_terminals / portfolio_array[asset_idx]) - 1
         
         path_statistics[f'asset_{asset_idx}'] = {
             'final_mean': float(np.mean(asset_terminals)),
             'final_std': float(np.std(asset_terminals)),
             'return_mean': float(np.mean(asset_returns) * 100),
             'return_std': float(np.std(asset_returns) * 100),
-            'max_drawdown': calculate_max_drawdown(stored_paths[:, :, asset_idx], portfolio[asset_idx])
+            'max_drawdown': calculate_max_drawdown(stored_paths[:, :, asset_idx], portfolio_array[asset_idx])
         }
     
     # Portfolio-level statistics
     portfolio_returns = (simulation_results / initial_value) - 1
     
     # Theoretical vs empirical comparison
-    theoretical_mean = initial_value * np.exp(np.sum((portfolio / initial_value) * expected_returns) * horizon)
+    theoretical_mean = initial_value * np.exp(np.sum((portfolio_array / initial_value) * expected_returns) * horizon)
     theoretical_std = initial_value * np.sqrt(
-        np.sum((portfolio / initial_value)**2 * volatilities**2) * horizon +
+        np.sum((portfolio_array / initial_value)**2 * volatilities**2) * horizon +
         2 * np.sum([
-            (portfolio[i] * portfolio[j] / initial_value**2) * volatilities[i] * volatilities[j] * correlation_matrix[i, j] * horizon
+            (portfolio_array[i] * portfolio_array[j] / initial_value**2) * volatilities[i] * volatilities[j] * correlation_matrix[i, j] * horizon
             for i in range(num_assets) for j in range(i + 1, num_assets)
         ])
     )
@@ -208,7 +208,7 @@ def gbm_simulation(
             'method': 'gbm',
             'engine': 'python',
             'initial_value': float(initial_value),
-            'portfolio': portfolio.tolist(),
+            'portfolio': portfolio_array.tolist(),
             'iterations': iterations,
             'confidence': confidence,
             'horizon_years': horizon,
@@ -297,9 +297,9 @@ def multi_asset_gbm(
     jump_std = params.get('jump_std', 0.1)  # Jump volatility
     time_varying_vol = params.get('time_varying_volatility', False)
     
-    portfolio = np.array(portfolio, dtype=np.float64)
-    initial_value = np.sum(portfolio)
-    num_assets = len(portfolio)
+    portfolio_array = np.array(portfolio, dtype=np.float64)
+    initial_value = np.sum(portfolio_array)
+    num_assets = len(portfolio_array)
     
     print(f"🔀 Running Multi-Asset GBM Simulation:")
     print(f"  Portfolio Value: ${initial_value:,.2f}")
@@ -340,7 +340,7 @@ def multi_asset_gbm(
     
     for i in range(iterations):
         # Initialize asset prices
-        asset_prices = portfolio.copy()
+        asset_prices = portfolio_array.copy()
         
         if i < store_detailed_paths:
             detailed_paths[i, 0] = asset_prices
@@ -397,7 +397,7 @@ def multi_asset_gbm(
         terminal_returns = np.zeros((store_detailed_paths, num_assets))
         for asset_idx in range(num_assets):
             terminal_values = detailed_paths[:, -1, asset_idx]
-            terminal_returns[:, asset_idx] = (terminal_values / portfolio[asset_idx]) - 1
+            terminal_returns[:, asset_idx] = (terminal_values / portfolio_array[asset_idx]) - 1
         
         empirical_correlation = np.corrcoef(terminal_returns.T)
         correlation_error = np.mean(np.abs(empirical_correlation - correlation_matrix))
@@ -417,7 +417,7 @@ def multi_asset_gbm(
     if num_assets > 1:
         asset_contributions = np.zeros(num_assets)
         for asset_idx in range(num_assets):
-            asset_weight = portfolio[asset_idx] / initial_value
+            asset_weight = portfolio_array[asset_idx] / initial_value
             asset_contributions[asset_idx] = asset_weight * 100
         
         largest_contributor = int(np.argmax(asset_contributions))
@@ -432,7 +432,7 @@ def multi_asset_gbm(
             'method': 'multi_asset_gbm',
             'engine': 'python',
             'initial_value': float(initial_value),
-            'portfolio': portfolio.tolist(),
+            'portfolio': portfolio_array.tolist(),
             'iterations': iterations,
             'confidence': confidence,
             'horizon_years': horizon,
@@ -457,10 +457,10 @@ def multi_asset_gbm(
         'jump_analysis': jump_analysis,
         
         'asset_analysis': {
-            'portfolio_weights': [float(w) for w in (portfolio / initial_value)],
+            'portfolio_weights': [float(w) for w in (portfolio_array / initial_value)],
             'weight_percentages': [float(c) for c in asset_contributions],
             'largest_contributor': largest_contributor,
-            'diversification_score': float(1 - np.max(portfolio / initial_value)) if num_assets > 1 else 0.0
+            'diversification_score': float(1 - np.max(portfolio_array / initial_value)) if num_assets > 1 else 0.0
         },
         
         'model_validation': {
@@ -522,8 +522,8 @@ def path_dependent_gbm(
     averaging_period = params.get('averaging_period', None)  # Asian-style averaging
     lookback_monitoring = params.get('lookback_monitoring', False)
     
-    portfolio = np.array(portfolio, dtype=np.float64)
-    initial_value = np.sum(portfolio)
+    portfolio_array = np.array(portfolio, dtype=np.float64)
+    initial_value = np.sum(portfolio_array)
     
     print(f"🛤️  Running Path-Dependent GBM Simulation:")
     print(f"  Portfolio Value: ${initial_value:,.2f}")
@@ -545,8 +545,8 @@ def path_dependent_gbm(
     # Ensure single asset for simplicity of path-dependent features
     if len(portfolio) > 1:
         # Aggregate to single asset
-        portfolio_return = np.sum((portfolio / initial_value) * expected_returns)
-        portfolio_volatility = np.sqrt(np.sum((portfolio / initial_value)**2 * volatilities**2))
+        portfolio_return = np.sum((portfolio_array / initial_value) * expected_returns)
+        portfolio_volatility = np.sqrt(np.sum((portfolio_array / initial_value)**2 * volatilities**2))
         expected_returns = np.array([portfolio_return])
         volatilities = np.array([portfolio_volatility])
     
@@ -633,7 +633,7 @@ def path_dependent_gbm(
             'method': 'path_dependent_gbm',
             'engine': 'python',
             'initial_value': float(initial_value),
-            'portfolio': portfolio.tolist(),
+            'portfolio': portfolio_array.tolist(),
             'iterations': iterations,
             'confidence': confidence,
             'horizon_years': horizon,
@@ -716,7 +716,7 @@ def calculate_skewness(data: np.ndarray) -> float:
     if std_val == 0:
         return 0.0
     skew = np.mean(((data - mean_val) / std_val) ** 3)
-    return skew
+    return float(skew)
 
 def calculate_kurtosis(data: np.ndarray) -> float:
     """Calculate excess kurtosis of data"""
@@ -725,7 +725,7 @@ def calculate_kurtosis(data: np.ndarray) -> float:
     if std_val == 0:
         return 0.0
     kurt = np.mean(((data - mean_val) / std_val) ** 4) - 3
-    return kurt
+    return float(kurt)
 
 # Export functions
 __all__ = [

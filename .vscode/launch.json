@@ -8,6 +8,7 @@
             "program": "${workspaceFolder}/backend/python/app.py",
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}/backend/python",
+            "python": "${workspaceFolder}/.venv/Scripts/python.exe",
             "env": {
                 "FLASK_APP": "app.py",
                 "FLASK_ENV": "development",
@@ -24,6 +25,26 @@
                 "hidden": false,
                 "group": "Python Backend",
                 "order": 1
+            }
+        },
+        {
+            "name": "Debug Current Python File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/backend/python",
+            "python": "${workspaceFolder}/.venv/Scripts/python.exe",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/backend/python"
+            },
+            "args": [],
+            "justMyCode": false,
+            "stopOnEntry": false,
+            "presentation": {
+                "hidden": false,
+                "group": "Python Backend",
+                "order": 2
             }
         },
         {

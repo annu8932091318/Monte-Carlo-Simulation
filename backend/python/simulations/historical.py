@@ -17,12 +17,30 @@ import numpy as np
 import time
 from typing import Dict, List, Any, Optional, Tuple
 import warnings
-from .math_helpers import (
-    generate_normal_random,
-    calculate_portfolio_statistics,
-    calculate_correlation_matrix,
-    calculate_risk_metrics
-)
+try:
+    from utils.math_helpers import (
+        random_normal,
+        calculate_statistics,
+        calculate_correlation,
+        calculate_var,
+        calculate_cvar,
+        bootstrap_sample,
+        validate_portfolio
+    )
+except ImportError:
+    # Fallback for direct execution
+    import sys
+    import os
+    sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+    from utils.math_helpers import (
+        random_normal,
+        calculate_statistics,
+        calculate_correlation,
+        calculate_var,
+        calculate_cvar,
+        bootstrap_sample,
+        validate_portfolio
+    )
 
 def generate_historical_returns(
     portfolio: List[float],
@@ -147,8 +165,8 @@ def historical_simulation(
     horizon = params.get('horizon', 1.0)  # Time horizon in years
     lookback_periods = params.get('lookback_periods', 252)
     
-    portfolio = np.array(portfolio, dtype=np.float64)
-    initial_value = np.sum(portfolio)
+    portfolio_array = np.array(portfolio, dtype=np.float64)
+    initial_value = np.sum(portfolio_array)
     
     print(f"🏛️ Running Historical Simulation:")
     print(f"  Portfolio Value: ${initial_value:,.2f}")
@@ -172,7 +190,7 @@ def historical_simulation(
     simulation_results = np.zeros(iterations)
     
     # Calculate portfolio weights
-    weights = portfolio / initial_value
+    weights = portfolio_array / initial_value
     
     for i in range(iterations):
         # Randomly sample one period from historical returns
@@ -190,11 +208,9 @@ def historical_simulation(
     losses = initial_value - simulation_results
     profit_loss = simulation_results - initial_value
     
-    risk_metrics = calculate_risk_metrics(
-        simulation_results, 
-        initial_value, 
-        confidence
-    )
+    # Calculate VaR and CVaR directly
+    var_95 = calculate_var(losses, confidence)
+    cvar_95 = calculate_cvar(losses, confidence)
     
     # Additional historical simulation specific metrics
     returns_distribution = (simulation_results / initial_value) - 1
@@ -215,7 +231,7 @@ def historical_simulation(
             'method': 'historical_simulation',
             'engine': 'python',
             'initial_value': float(initial_value),
-            'portfolio': portfolio.tolist(),
+            'portfolio': portfolio_array.tolist(),
             'iterations': iterations,
             'confidence': confidence,
             'horizon_years': horizon,
@@ -223,7 +239,14 @@ def historical_simulation(
             'historical_approach': 'non_parametric_resampling'
         },
         
-        'risk_metrics': risk_metrics,
+        'risk_metrics': {
+            'VaR_95': float(var_95),
+            'CVaR_95': float(cvar_95),
+            'probability_of_loss': float(np.sum(losses > 0) / iterations * 100),
+            'expected_shortfall': float(cvar_95),
+            'maximum_loss': float(np.max(losses)),
+            'maximum_gain': float(np.max(profit_loss))
+        },
         
         'historical_analysis': {
             'worst_case_scenario': float(worst_case),
@@ -231,7 +254,7 @@ def historical_simulation(
             'median_scenario': float(median_case),
             'scenario_range': float(best_case - worst_case),
             'downside_scenarios': float(np.sum(simulation_results < initial_value) / iterations * 100),
-            'extreme_loss_scenarios': float(np.sum(losses > risk_metrics['VaR_95']) / iterations * 100)
+            'extreme_loss_scenarios': float(np.sum(losses > var_95) / iterations * 100)
         },
         
         'distribution_analysis': {
@@ -291,7 +314,7 @@ def bootstrap_historical(
     lookback_periods = params.get('lookback_periods', 252)
     block_size = params.get('block_size', 5)  # Block bootstrap size
     
-    portfolio = np.array(portfolio, dtype=np.float64)
+    portfolio_array = np.array(portfolio, dtype=np.float64)
     initial_value = np.sum(portfolio)
     
     print(f"🔄 Running Bootstrap Historical Simulation:")
@@ -336,11 +359,10 @@ def bootstrap_historical(
         simulation_results[i] = terminal_value
     
     # Calculate risk metrics and analysis
-    risk_metrics = calculate_risk_metrics(
-        simulation_results, 
-        initial_value, 
-        confidence
-    )
+    losses = initial_value - simulation_results
+    profit_loss = simulation_results - initial_value
+    var_95 = calculate_var(losses, confidence)
+    cvar_95 = calculate_cvar(losses, confidence)
     
     # Bootstrap-specific analysis
     returns_distribution = (simulation_results / initial_value) - 1
@@ -352,7 +374,7 @@ def bootstrap_historical(
         simple_hist_results[i] = initial_value * (1 + sample_return * horizon)
     
     simple_var = np.percentile(initial_value - simple_hist_results, confidence * 100)
-    bootstrap_var = risk_metrics['VaR_95']
+    bootstrap_var = var_95
     
     simulation_time = time.time() - start_time
     
@@ -361,7 +383,7 @@ def bootstrap_historical(
             'method': 'bootstrap_historical',
             'engine': 'python', 
             'initial_value': float(initial_value),
-            'portfolio': portfolio.tolist(),
+            'portfolio': portfolio_array.tolist(),
             'iterations': iterations,
             'confidence': confidence,
             'horizon_years': horizon,
@@ -370,7 +392,14 @@ def bootstrap_historical(
             'bootstrap_approach': 'block_bootstrap_with_overlap'
         },
         
-        'risk_metrics': risk_metrics,
+        'risk_metrics': {
+            'VaR_95': float(var_95),
+            'CVaR_95': float(cvar_95),
+            'probability_of_loss': float(np.sum(losses > 0) / iterations * 100),
+            'expected_shortfall': float(cvar_95),
+            'maximum_loss': float(np.max(losses)),
+            'maximum_gain': float(np.max(profit_loss))
+        },
         
         'bootstrap_analysis': {
             'bootstrap_var_stability': float(abs(bootstrap_var - simple_var) / simple_var * 100),

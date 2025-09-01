@@ -76,10 +76,10 @@ def variance_covariance_method(
     volatilities = params.get('volatilities', None)
     correlations = params.get('correlations', None)
     
-    portfolio = np.array(portfolio, dtype=np.float64)
-    initial_value = np.sum(portfolio)
-    num_assets = len(portfolio)
-    weights = portfolio / initial_value
+    portfolio_array = np.array(portfolio, dtype=np.float64)
+    initial_value = np.sum(portfolio_array)
+    num_assets = len(portfolio_array)
+    weights = portfolio_array / initial_value
     
     print(f"📊 Running Variance-Covariance Method:")
     print(f"  Portfolio Value: ${initial_value:,.2f}")
@@ -170,9 +170,9 @@ def variance_covariance_method(
         asset_volatility = volatilities[i] * np.sqrt(horizon)
         
         if SCIPY_AVAILABLE:
-            asset_var = (portfolio[i]) * (-asset_return + asset_volatility * (-stats.norm.ppf(alpha)))
+            asset_var = (portfolio_array[i]) * (-asset_return + asset_volatility * (-stats.norm.ppf(alpha)))
         else:
-            asset_var = (portfolio[i]) * (-asset_return + asset_volatility * (-z_alpha))
+            asset_var = (portfolio_array[i]) * (-asset_return + asset_volatility * (-z_alpha))
         
         individual_vars.append(asset_var)
     
@@ -198,7 +198,7 @@ def variance_covariance_method(
             'method': 'variance_covariance',
             'engine': 'python',
             'initial_value': float(initial_value),
-            'portfolio': portfolio.tolist(),
+            'portfolio': portfolio_array.tolist(),
             'confidence': confidence,
             'horizon_years': horizon,
             'assumption': 'multivariate_normal_returns',
@@ -269,9 +269,9 @@ def stress_test_varcov(
     if params is None:
         params = {}
     
-    portfolio = np.array(portfolio, dtype=np.float64)
-    initial_value = np.sum(portfolio)
-    num_assets = len(portfolio)
+    portfolio_array = np.array(portfolio, dtype=np.float64)
+    initial_value = np.sum(portfolio_array)
+    num_assets = len(portfolio_array)
     
     print(f"🧪 Running VarCov Stress Testing:")
     print(f"  Portfolio Value: ${initial_value:,.2f}")
@@ -378,7 +378,7 @@ def stress_test_varcov(
             'method': 'stress_test_varcov',
             'engine': 'python',
             'initial_value': float(initial_value),
-            'portfolio': portfolio.tolist(),
+            'portfolio': portfolio_array.tolist(),
             'base_case_VaR': float(base_var),
             'base_case_CVaR': float(base_cvar),
             'confidence': confidence,

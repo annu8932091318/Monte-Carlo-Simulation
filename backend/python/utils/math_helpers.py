@@ -7,7 +7,7 @@ functions, and financial calculations.
 """
 
 import numpy as np
-import scipy.stats as stats
+# import scipy.stats as stats  # Temporarily disabled for debugging
 from typing import List, Tuple, Dict, Any, Optional
 import warnings
 
@@ -36,7 +36,7 @@ def calculate_percentile(arr: np.ndarray, percentile: float) -> float:
     Returns:
         Value at the specified percentile
     """
-    return np.percentile(arr, percentile)
+    return float(np.percentile(arr, percentile))
 
 def calculate_var(losses: np.ndarray, confidence: float = 0.95) -> float:
     """
@@ -69,7 +69,7 @@ def calculate_cvar(losses: np.ndarray, confidence: float = 0.95) -> float:
     if len(tail_losses) == 0:
         return var_threshold
     
-    return np.mean(tail_losses)
+    return float(np.mean(tail_losses))
 
 def calculate_portfolio_stats(weights: np.ndarray, 
                             expected_returns: np.ndarray, 
@@ -209,7 +209,8 @@ def normal_cdf(z: float) -> float:
     Returns:
         Cumulative probability
     """
-    return stats.norm.cdf(z)
+    # Simple approximation for debugging
+    return 0.5 * (1 + np.sign(z) * np.sqrt(1 - np.exp(-2 * z**2 / np.pi)))
 
 def normal_inverse_cdf(p: float) -> float:
     """
@@ -221,7 +222,11 @@ def normal_inverse_cdf(p: float) -> float:
     Returns:
         Z-score
     """
-    return stats.norm.ppf(p)
+    # Simple approximation for debugging
+    if p <= 0 or p >= 1:
+        raise ValueError("Probability must be between 0 and 1")
+    # Approximation using Box-Muller transform approach
+    return np.sqrt(-2 * np.log(1 - p)) if p > 0.5 else -np.sqrt(-2 * np.log(p))
 
 def calculate_skewness(data: np.ndarray) -> float:
     """
@@ -233,7 +238,12 @@ def calculate_skewness(data: np.ndarray) -> float:
     Returns:
         Skewness value
     """
-    return float(stats.skew(data))
+    # Simple skewness calculation
+    mean = np.mean(data)
+    std = np.std(data)
+    if std == 0:
+        return 0.0
+    return float(np.mean(((data - mean) / std) ** 3))
 
 def calculate_kurtosis(data: np.ndarray) -> float:
     """
@@ -245,7 +255,12 @@ def calculate_kurtosis(data: np.ndarray) -> float:
     Returns:
         Kurtosis value
     """
-    return float(stats.kurtosis(data))
+    # Simple kurtosis calculation
+    mean = np.mean(data)
+    std = np.std(data)
+    if std == 0:
+        return 0.0
+    return float(np.mean(((data - mean) / std) ** 4) - 3)
 
 def calculate_autocorrelation(data: np.ndarray, max_lag: int = 5) -> List[float]:
     """

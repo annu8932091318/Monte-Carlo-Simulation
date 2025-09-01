@@ -89,10 +89,10 @@ def bootstrap_simulation(
     horizon = params.get('horizon', 1.0)
     sample_size = params.get('sample_size', 252)  # Historical sample size
     
-    portfolio = np.array(portfolio, dtype=np.float64)
-    initial_value = np.sum(portfolio)
-    num_assets = len(portfolio)
-    weights = portfolio / initial_value
+    portfolio_array = np.array(portfolio, dtype=np.float64)
+    initial_value = np.sum(portfolio_array)
+    num_assets = len(portfolio_array)
+    weights = portfolio_array / initial_value
     
     print(f"🥾 Running Bootstrap Simulation:")
     print(f"  Portfolio Value: ${initial_value:,.2f}")
@@ -153,7 +153,7 @@ def bootstrap_simulation(
             'method': 'bootstrap',
             'engine': 'python',
             'initial_value': float(initial_value),
-            'portfolio': portfolio.tolist(),
+            'portfolio': portfolio_array.tolist(),
             'iterations': iterations,
             'confidence': confidence,
             'horizon_years': horizon,
@@ -230,10 +230,10 @@ def advanced_bootstrap(
     bootstrap_method = params.get('bootstrap_method', 'stratified')
     block_size = params.get('block_size', 10)
     
-    portfolio = np.array(portfolio, dtype=np.float64)
-    initial_value = np.sum(portfolio)
-    num_assets = len(portfolio)
-    weights = portfolio / initial_value
+    portfolio_array = np.array(portfolio, dtype=np.float64)
+    initial_value = np.sum(portfolio_array)
+    num_assets = len(portfolio_array)
+    weights = portfolio_array / initial_value
     
     print(f"🚀 Running Advanced Bootstrap Simulation:")
     print(f"  Portfolio Value: ${initial_value:,.2f}")
@@ -399,7 +399,7 @@ def advanced_bootstrap(
             'method': 'advanced_bootstrap',
             'engine': 'python',
             'initial_value': float(initial_value),
-            'portfolio': portfolio.tolist(),
+            'portfolio': portfolio_array.tolist(),
             'iterations': iterations,
             'confidence': confidence,
             'horizon_years': horizon,

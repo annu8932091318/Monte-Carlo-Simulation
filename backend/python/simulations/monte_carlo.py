@@ -9,12 +9,24 @@ future portfolio values and calculates risk metrics.
 import numpy as np
 import time
 from typing import Dict, List, Any, Optional
-from ..utils.math_helpers import (
-    calculate_var, calculate_cvar, calculate_statistics,
-    calculate_portfolio_stats, correlation_to_covariance,
-    generate_correlated_normals, validate_portfolio,
-    validate_correlation_matrix
-)
+try:
+    from utils.math_helpers import (
+        calculate_var, calculate_cvar, calculate_statistics,
+        calculate_portfolio_stats, correlation_to_covariance,
+        generate_correlated_normals, validate_portfolio,
+        validate_correlation_matrix
+    )
+except ImportError:
+    # Fallback for direct execution
+    import sys
+    import os
+    sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+    from utils.math_helpers import (
+        calculate_var, calculate_cvar, calculate_statistics,
+        calculate_portfolio_stats, correlation_to_covariance,
+        generate_correlated_normals, validate_portfolio,
+        validate_correlation_matrix
+    )
 
 def monte_carlo_simulation(portfolio: List[float], 
                          params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
