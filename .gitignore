@@ -5,6 +5,7 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 .pnpm-debug.log*
+package-lock.json
 
 # Node.js runtime data
 pids
@@ -19,6 +20,7 @@ coverage/
 # Node.js build outputs
 dist/
 build/
+out/
 
 # Python
 __pycache__/
@@ -65,7 +67,7 @@ cover/
 
 # Virtual environments
 .env
-.venv
+.venv/
 env/
 venv/
 ENV/
@@ -101,6 +103,9 @@ celerybeat.pid
 .env.development.local
 .env.test.local
 .env.production.local
+.env.development
+.env.test
+.env.production
 
 # Spyder project settings
 .spyderproject
@@ -136,15 +141,26 @@ ehthumbs.db
 Thumbs.db
 desktop.ini
 
+# Hidden files and directories (dot files)
+.*
+!.gitignore
+!.gitattributes
+
 # Editor files
-.vscode/settings.json
+.vscode/
 .idea/
 *.swp
 *.swo
 *~
 
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+
 # Logs
-logs
+logs/
 *.log
 
 # Runtime data
@@ -188,7 +204,7 @@ jspm_packages/
 .vuepress/dist
 
 # Serverless directories
-.serverless
+.serverless/
 
 # FuseBox cache
 .fusebox/
@@ -213,3 +229,10 @@ jspm_packages/
 config_examples.txt
 main_README.md
 test_simulation.py
+
+# Test files and outputs
+test_request.json
+*.postman_collection.json
+simulation_results/
+output/
+results/
