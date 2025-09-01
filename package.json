@@ -1,0 +1,53 @@
+{
+    "name": "multi-simulation-risk-engine",
+    "version": "1.0.0",
+    "description": "Multi-Language Risk Simulation Engine with Node.js and Python backends",
+    "main": "gateway.py",
+    "scripts": {
+        "install-all": "npm install && cd backend/node && npm install && cd ../python && pip install -r requirements.txt",
+        "start-node": "cd backend/node && npm start",
+        "start-python": "cd backend/python && python app.py",
+        "start-gateway": "python gateway.py",
+        "start-all": "concurrently \"npm run start-node\" \"npm run start-python\" \"npm run start-gateway\"",
+        "dev-node": "cd backend/node && npm run dev",
+        "dev-python": "cd backend/python && set FLASK_DEBUG=true && python app.py",
+        "dev-gateway": "python gateway.py",
+        "dev-all": "concurrently \"npm run dev-node\" \"npm run dev-python\" \"npm run dev-gateway\"",
+        "test-node": "cd backend/node && npm test",
+        "test-python": "cd backend/python && python -m pytest tests/",
+        "test-all": "npm run test-node && npm run test-python",
+        "health-check": "curl http://localhost:3000/health",
+        "examples": "node examples/demo.js"
+    },
+    "keywords": [
+        "monte-carlo",
+        "risk-simulation",
+        "portfolio-risk",
+        "financial-modeling",
+        "quantitative-finance",
+        "nodejs",
+        "python",
+        "api",
+        "microservices"
+    ],
+    "author": "Multi-Language Risk Engine Team",
+    "license": "MIT",
+    "dependencies": {
+        "concurrently": "^8.2.2"
+    },
+    "devDependencies": {
+        "nodemon": "^3.0.1"
+    },
+    "engines": {
+        "node": ">=16.0.0",
+        "python": ">=3.8.0"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/your-username/multi-simulation-risk-engine.git"
+    },
+    "bugs": {
+        "url": "https://github.com/your-username/multi-simulation-risk-engine/issues"
+    },
+    "homepage": "https://github.com/your-username/multi-simulation-risk-engine#readme"
+}

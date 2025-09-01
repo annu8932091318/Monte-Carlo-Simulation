@@ -1,0 +1,115 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python Backend Server",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/backend/python/app.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/backend/python",
+            "env": {
+                "FLASK_APP": "app.py",
+                "FLASK_ENV": "development",
+                "FLASK_DEBUG": "1",
+                "PYTHONPATH": "${workspaceFolder}/backend/python"
+            },
+            "args": [],
+            "justMyCode": false,
+            "stopOnEntry": false,
+            "purpose": [
+                "debug-test"
+            ],
+            "presentation": {
+                "hidden": false,
+                "group": "Python Backend",
+                "order": 1
+            }
+        },
+        {
+            "name": "Node.js Backend Server",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/backend/node/index.js",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/backend/node",
+            "env": {
+                "NODE_ENV": "development",
+                "PORT": "3001"
+            },
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "stopOnEntry": false,
+            "restart": true,
+            "runtimeArgs": [
+                "--inspect"
+            ],
+            "presentation": {
+                "hidden": false,
+                "group": "Node.js Backend",
+                "order": 2
+            }
+        },
+        {
+            "name": "Python Tests",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytest",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/backend/python",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/backend/python"
+            },
+            "args": [
+                "-v",
+                "--tb=short"
+            ],
+            "justMyCode": false,
+            "presentation": {
+                "hidden": false,
+                "group": "Testing",
+                "order": 3
+            }
+        },
+        {
+            "name": "Node.js Tests",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/backend/node/node_modules/.bin/jest",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/backend/node",
+            "env": {
+                "NODE_ENV": "test"
+            },
+            "args": [
+                "--verbose",
+                "--detectOpenHandles"
+            ],
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "presentation": {
+                "hidden": false,
+                "group": "Testing",
+                "order": 4
+            }
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Launch Both Backends",
+            "configurations": [
+                "Python Backend Server",
+                "Node.js Backend Server"
+            ],
+            "presentation": {
+                "hidden": false,
+                "group": "Multi-Server",
+                "order": 1
+            },
+            "stopAll": true,
+            "preLaunchTask": "install-dependencies"
+        }
+    ]
+}
