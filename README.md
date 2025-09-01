@@ -1,6 +1,9 @@
-# 🎯 Multi-Simulation Risk Engine (Python + Node.js)
+# Portfolio Risk Simulation Engine
 
-## 🚀 The Ultimate Financial Risk Modeling Platform
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Python](https://img.shields.io/badge/python-3.8+-yellow.svg)
+![Node.js](https://img.shields.io/badge/node.js-14+-green.svg)
+
 
 A **comprehensive dual-language risk simulation engine** that provides high-performance financial risk modeling through **both Python and Node.js backends**. This project demonstrates the power of multi-engine architecture for quantitative finance applications.
 
