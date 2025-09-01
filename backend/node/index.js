@@ -11,7 +11,7 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 5010;
 
 // Middleware
 app.use(helmet());
@@ -582,12 +582,23 @@ app.use((req, res) => {
 });
 
 // Start server
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
     console.log(`🚀 Risk Simulation Engine (Node.js) running on port ${PORT}`);
     console.log(`📊 API Documentation: http://localhost:${PORT}/api/docs`);
     console.log(`🏥 Health Check: http://localhost:${PORT}/health`);
     console.log(`📝 Examples: http://localhost:${PORT}/api/examples`);
     console.log(`🎯 Ready to process risk simulations!`);
+});
+
+// Handle server errors
+server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+        console.error(`❌ Port ${PORT} is already in use. Please try a different port.`);
+        console.error(`💡 Try setting PORT environment variable: $env:PORT="8080"; node index.js`);
+    } else {
+        console.error(`❌ Server error:`, err);
+    }
+    process.exit(1);
 });
 
 module.exports = app;

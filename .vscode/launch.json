@@ -56,7 +56,7 @@
             "cwd": "${workspaceFolder}/backend/node",
             "env": {
                 "NODE_ENV": "development",
-                "PORT": "3001"
+                "PORT": "5010"
             },
             "skipFiles": [
                 "<node_internals>/**"
