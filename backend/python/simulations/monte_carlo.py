@@ -51,17 +51,39 @@ def monte_carlo_simulation(portfolio: List[float],
     iterations = params.get('iterations', 1000000)
     confidence = params.get('confidence', 0.95)
     horizon = params.get('horizon', 1.0)
-    expected_returns = np.array(params.get('expected_returns', [0.08, 0.05, 0.12, 0.03]))
-    volatilities = np.array(params.get('volatilities', [0.20, 0.15, 0.25, 0.10]))
-    correlation_matrix = np.array(params.get('correlation_matrix', [
-        [1.00, 0.40, 0.30, 0.10],
-        [0.40, 1.00, 0.35, 0.15],
-        [0.30, 0.35, 1.00, 0.05],
-        [0.10, 0.15, 0.05, 1.00]
-    ]))
     
-    # Validate inputs
+    # Validate inputs first
     portfolio_array = validate_portfolio(portfolio)
+    n_assets = len(portfolio_array)
+    
+    # Dynamic default parameters based on portfolio size
+    if n_assets == 3:
+        expected_returns = np.array(params.get('expected_returns', [0.08, 0.05, 0.12]))
+        volatilities = np.array(params.get('volatilities', [0.20, 0.15, 0.25]))
+        correlation_matrix = np.array(params.get('correlation_matrix', [
+            [1.00, 0.40, 0.30],
+            [0.40, 1.00, 0.35],
+            [0.30, 0.35, 1.00]
+        ]))
+    elif n_assets == 4:
+        expected_returns = np.array(params.get('expected_returns', [0.08, 0.05, 0.12, 0.03]))
+        volatilities = np.array(params.get('volatilities', [0.20, 0.15, 0.25, 0.10]))
+        correlation_matrix = np.array(params.get('correlation_matrix', [
+            [1.00, 0.40, 0.30, 0.10],
+            [0.40, 1.00, 0.35, 0.15],
+            [0.30, 0.35, 1.00, 0.05],
+            [0.10, 0.15, 0.05, 1.00]
+        ]))
+    else:
+        # General case: create defaults for any number of assets
+        expected_returns = np.array(params.get('expected_returns', 
+                                             [0.08] * n_assets))  # Default 8% return for all
+        volatilities = np.array(params.get('volatilities', 
+                                          [0.20] * n_assets))   # Default 20% volatility for all
+        # Identity matrix with some correlation
+        correlation_matrix = np.array(params.get('correlation_matrix',
+                                                np.eye(n_assets) * 0.7 + np.ones((n_assets, n_assets)) * 0.3))
+    
     correlation_matrix = validate_correlation_matrix(correlation_matrix)
     
     # Calculate initial portfolio value and weights
