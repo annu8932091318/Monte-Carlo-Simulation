@@ -236,3 +236,7 @@ test_request.json
 simulation_results/
 output/
 results/
+
+# LinkedIn posts and documentation
+LinkedIn_Simulation_Posts.md
+*.md.backup

@@ -2,10 +2,11 @@
   "name": "risk-sim-engine-node",
   "version": "1.0.0",
   "description": "Node.js Risk Simulation Engine with multiple Monte Carlo strategies",
-  "main": "index.js",
+  "main": "index-fixed.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js",
+    "start": "node --expose-gc index-fixed.js",
+    "dev": "node --expose-gc index-fixed.js",
+    "original": "node index.js",
     "test": "jest"
   },
   "keywords": [

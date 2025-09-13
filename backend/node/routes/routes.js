@@ -215,10 +215,12 @@ router.get('/api/examples', (req, res) => {
 });
 
 // Main simulation route
-router.post('/simulate', async (req, res) => {
+router.post('/simulate', (req, res) => {
+    let result;
+    const startTime = Date.now();
+
     try {
         console.log(`🚀 Received simulation request: ${req.body.method || 'unknown'}`);
-        const startTime = Date.now();
 
         const { method, portfolio, params = {} } = req.body;
 
@@ -239,54 +241,70 @@ router.post('/simulate', async (req, res) => {
             });
         }
 
-        let result;
+        // Route to appropriate simulation method with individual error handling
+        try {
+            switch (method) {
+                case 'monte_carlo':
+                    result = monteCarloSimulation(portfolio, params);
+                    break;
+                case 'advanced_monte_carlo':
+                    result = advancedMonteCarloSimulation(portfolio, params);
+                    break;
+                case 'historical_simulation':
+                    result = historicalSimulation(portfolio, params);
+                    break;
+                case 'bootstrap_historical':
+                    result = bootstrapHistoricalSimulation(portfolio, params);
+                    break;
+                case 'bootstrap':
+                    result = bootstrapSimulation(portfolio, params);
+                    break;
+                case 'advanced_bootstrap':
+                    result = advancedBootstrapSimulation(portfolio, params);
+                    break;
+                case 'variance_covariance':
+                    result = varianceCovarianceMethod(portfolio, params);
+                    break;
+                case 'stress_test_varcov':
+                    result = stressTestVarCov(portfolio, params);
+                    break;
+                case 'gbm':
+                    result = gbmSimulation(portfolio, params);
+                    break;
+                case 'multi_asset_gbm':
+                    result = multiAssetGBM(portfolio, params);
+                    break;
+                case 'path_dependent_gbm':
+                    result = pathDependentGBM(portfolio, params);
+                    break;
+                default:
+                    return res.status(400).json({
+                        error: `Unknown simulation method: ${method}`,
+                        supported_methods: [
+                            'monte_carlo', 'advanced_monte_carlo', 'historical_simulation',
+                            'bootstrap_historical', 'bootstrap', 'advanced_bootstrap',
+                            'variance_covariance', 'stress_test_varcov', 'gbm',
+                            'multi_asset_gbm', 'path_dependent_gbm'
+                        ],
+                        engine: 'node'
+                    });
+            }
+        } catch (simulationError) {
+            console.error(`❌ Error in ${method} simulation:`, simulationError);
+            return res.status(500).json({
+                error: `${method} simulation failed`,
+                message: simulationError.message,
+                stack: simulationError.stack,
+                engine: 'node'
+            });
+        }
 
-        // Route to appropriate simulation method
-        switch (method) {
-            case 'monte_carlo':
-                result = monteCarloSimulation(portfolio, params);
-                break;
-            case 'advanced_monte_carlo':
-                result = advancedMonteCarloSimulation(portfolio, params);
-                break;
-            case 'historical_simulation':
-                result = historicalSimulation(portfolio, params);
-                break;
-            case 'bootstrap_historical':
-                result = bootstrapHistoricalSimulation(portfolio, params);
-                break;
-            case 'bootstrap':
-                result = bootstrapSimulation(portfolio, params);
-                break;
-            case 'advanced_bootstrap':
-                result = advancedBootstrapSimulation(portfolio, params);
-                break;
-            case 'variance_covariance':
-                result = varianceCovarianceMethod(portfolio, params);
-                break;
-            case 'stress_test_varcov':
-                result = stressTestVarCov(portfolio, params);
-                break;
-            case 'gbm':
-                result = gbmSimulation(portfolio, params);
-                break;
-            case 'multi_asset_gbm':
-                result = multiAssetGBM(portfolio, params);
-                break;
-            case 'path_dependent_gbm':
-                result = pathDependentGBM(portfolio, params);
-                break;
-            default:
-                return res.status(400).json({
-                    error: `Unknown simulation method: ${method}`,
-                    supported_methods: [
-                        'monte_carlo', 'advanced_monte_carlo', 'historical_simulation',
-                        'bootstrap_historical', 'bootstrap', 'advanced_bootstrap',
-                        'variance_covariance', 'stress_test_varcov', 'gbm',
-                        'multi_asset_gbm', 'path_dependent_gbm'
-                    ],
-                    engine: 'node'
-                });
+        if (!result) {
+            return res.status(500).json({
+                error: 'Simulation returned no result',
+                method: method,
+                engine: 'node'
+            });
         }
 
         const totalTime = Date.now() - startTime;
@@ -305,8 +323,15 @@ router.post('/simulate', async (req, res) => {
         res.json(result);
 
     } catch (error) {
-        console.error('❌ Simulation error:', error);
-        res.status(500).json(handleSimulationError(error));
+        console.error('❌ Route-level simulation error:', error);
+        const totalTime = Date.now() - startTime;
+        res.status(500).json({
+            error: 'Internal server error',
+            message: error.message,
+            stack: error.stack,
+            processing_time: totalTime / 1000,
+            engine: 'node'
+        });
     }
 });
 
